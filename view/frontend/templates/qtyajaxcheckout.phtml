@@ -1,0 +1,56 @@
+<?php
+$regionname = $block->getData('regioncode');
+
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$cart = $objectManager->get('\Magento\Checkout\Model\Cart'); 
+$items = $cart->getQuote()->getAllItems();
+
+$helperData = $objectManager->get('\Altitude\CSD\Helper\Data');
+$availQtyStatus = $helperData->getConfigData('defaults/products/check_aval_qty');
+$low_qty_amt = $helperData->getConfigData('defaults/products/low_qty_amt');
+$low_qty_msg = $helperData->getConfigData('defaults/products/low_qty_msg');
+$zero_qty_msg = $helperData->getConfigData('defaults/products/zero_qty_msg');
+$full_qty_msg = $helperData->getConfigData('defaults/products/full_qty_msg');
+
+    try{
+        $regioncollect = $objectManager->create('Magento\Directory\Model\ResourceModel\Region\Collection')
+                         ->addFieldToFilter('default_name', ['eq' => $regionname])->getFirstItem();
+        $regiondata = $regioncollect->getData();
+        $region = $regiondata['code'];
+     } catch (\Exception $e) {
+         error_log ("Error setting region in CSD/view/frontend/templates/qtyajaxcheckout.phtml "  . json_encode($e->getMessage()));
+     }
+?>
+
+<?php $i = 0; ?>
+<?php foreach($items as $item): ?>
+    <div class="itemavailqty" itemposi="<?= $i ?>">
+    <?php $_product = $objectManager->create('Magento\Catalog\Model\Product')->load($item->getProductId()); ?>
+    <?php
+            error_log ("Calling getQtyInfo on line 27 of CSD/view/frontend/templates/qtyajaxcheckout.phtml" );
+			$availQty = $helperData->getQtyInfo($_product, $region);
+			$qtyAvailable = $availQty;
+			$availQty = (!empty($availQty['qty'])) ? $availQty['qty'] : 0;
+			$qtyData = $full_qty_msg;
+			$message = $full_qty_msg;
+			if($availQty <= 0){
+				$message = $zero_qty_msg;
+			}else if($availQty <= $low_qty_amt){
+				$message = $low_qty_msg;
+			}
+    ?>
+
+        <?php if (isset($qtyAvailable['qty']) && ($availQtyStatus == 0)): ?>
+			<div class="details-qty addeditemqty" id="<?php echo "itemid-".$_product->getId() ?>">
+                <span class="label"><strong><?= __('Qty Available'> ?>'] ?></div>
+            </div>
+        <?php endif; ?>
+        <?php if ($availQtyStatus == 1): ?>
+			<div class="details-qty addeditemqty" id="<?php echo "itemid-".$_product->getId() ?>">
+			<strong class="config-message"><?php echo __($message); ?></strong>
+			</div>
+    <?php endif; ?>
+
+    <?php $i++; ?>
+    </div>
+<?php endforeach; ?>

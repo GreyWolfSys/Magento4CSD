@@ -1,0 +1,78 @@
+<?php 
+
+    $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+    $storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
+    $url= $storeManager->getStore()->getCurrentUrl(false);
+    if (strpos($url, 'cart') !== false) {
+        return "";
+    }
+    $_product = $block->getCurrentProduct();
+    $availQtyStatus = $this->getConfigData('defaults/products/check_aval_qty');
+    $low_qty_amt = $this->getConfigData('defaults/products/low_qty_amt');
+    $low_qty_msg = $this->getConfigData('defaults/products/low_qty_msg');
+    $zero_qty_msg = $this->getConfigData('defaults/products/zero_qty_msg');
+    $full_qty_msg = $this->getConfigData('defaults/products/full_qty_msg');
+   // error_log ("Calling getQtyInfo on line 8 of CSDProducts/view/frontend/templates/content.phtml for prod " );
+    $availQty = $this->getQtyInfo($_product);
+    $qtyAvailable =$availQty;
+    $availQty = (!empty($availQty['qty'])) ? $availQty['qty'] : 0;
+    $message = $full_qty_msg;
+    if($availQty <= 0){
+        $message = $zero_qty_msg;
+    }else if($availQty <= $low_qty_amt){
+        $message = $low_qty_msg;
+    }
+    
+?>
+<?php if ($_product->getTypeId() != 'simple'): ?>
+    <div class="product attribute sku gtooltip"><strong><?= __('Select options to see quantity available') ?></strong></div>
+<?php else: ?>
+    <?php 
+    //error_log ("Calling getQtyInfo on line 23 of CSDProducts/view/frontend/templates/content.phtml" );
+    //$qtyAvailable =$availQty;// $this->getQtyInfo($_product); 
+   //var_dump($qtyAvailable);
+    ?>
+
+    <?php if (isset($qtyAvailable['qty']) && (($availQtyStatus == 0) )): ?>
+        <div class="product attribute sku gtooltip">
+            <strong class="value"><?= __('Qty Available') ?>: </strong>
+            <div class="value" itemprop="qty"><?php echo $qtyAvailable['qty'] ?></div>
+            <?php if (count($qtyAvailable['more']) > 0): ?>
+                <div style="clear:both;" class="product attribute sku gtooltip">
+                    <a href="#" class=gtooltip><?= __('See More') ?></a>
+                </div>
+                <span>
+                    <?php foreach($qtyAvailable['more'] as $_qty): ?>
+                    <strong><?php echo $_qty['whName'] ?>:</strong> <?php echo $_qty['qty'] ?><br>
+                    <?php endforeach; ?>
+                </span>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
+<?php endif; ?>
+<?php if ($availQtyStatus == 1): ?>
+    <strong class="config-message"><?php echo __($message); ?></strong>
+<?php endif; ?>
+<script>
+require([
+    'jquery'
+], function ($) {
+    'use strict';
+
+    $("body").on('DOMSubtreeModified', "div[itemprop*='sku']", function() {
+        if ($("div[itemprop*='sku']").text() != "") {
+            $.ajax({
+                url: "<?php echo $this->getUrl('csdproductavailablequery/csdqty/csdqty') ?>",
+                type: "GET",
+                async: false,
+                data: {
+                    sku: $("div[itemprop*='sku']").text(),
+                    isAjax: true
+                }
+            }).done(function(msg) {
+                $(".product.attribute.sku.gtooltip").html(msg.output);
+            });
+        }
+    });
+});
+</script>

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column" xsi:noNamespaceSchemaLocation="../../../../../../../lib/internal/Magento/Framework/View/Layout/etc/page_configuration.xsd">
+	<head>
+        <css src="Altitude_CSDProducts::GreyWolfAvailable.css"/>
+    </head>
+	<body>
+		<referenceContainer name="product.info.stock.sku">
+			<block
+			    template="contentProduct.phtml"
+			    class="Altitude\CSD\Block\Main"
+			    name="greywolfsystems_CSDProducts"/>
+	    </referenceContainer>
+		<referenceContainer name="product.info.price">
+			<block
+			    template="price.phtml"
+			    class="Altitude\CSD\Block\Main"
+			    name="greywolfsystems_CSDProducts_price"
+				before="product.price.final" cacheable="false" />
+	    </referenceContainer>
+	</body>
+</page>

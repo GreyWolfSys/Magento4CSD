@@ -1,0 +1,279 @@
+<?php
+extract($this->getInvoices());
+if (isset($invoicesList["SalesCustomerInvoiceListResponseContainerItems"])){
+    $arr=$invoicesList["SalesCustomerInvoiceListResponseContainerItems"];
+}
+if (isset($_REQUEST["sortfield"])){
+    // if (1==1){
+   
+    $arr=$this->array_sort_by_column($arr,$_REQUEST["sortfield"],$_REQUEST["sortorder"]);
+   
+}
+
+   if (!empty($ownedOrders)){
+        if (isset($arr)){
+            foreach ($arr as  $key =>$item){
+                if (strpos($ownedOrders,$item["invno"])===false){
+                 //error_log("removing " . $item["invno"]);
+                 //$arr = array_diff($arr, $item);
+                   // unset($item);
+                    unset($arr[$key]);
+                }
+                
+            }
+        }
+    }
+        if (isset($arr)){
+            foreach ($arr as  $key =>$item){
+                if ($item["seqno"]==0){
+                    unset($arr[$key]);
+                }
+                
+            }
+        }
+
+    if ($ownedOrders =="|" ){
+        //no orders found that are owned
+        //error_log("no orders found");
+        $invoicesList=false;
+        //return "";
+    }
+ //var_dump($invoicesList["SalesCustomerInvoiceListResponseContainerItems"]);
+$sortorder="";
+//echo $_REQUEST["sortorder"] . "<br>";
+if (!isset($_REQUEST["sortorder"])){
+    $sortorder="asc";
+}elseif ($_REQUEST["sortorder"]=="asc"){
+    $sortorder="desc";
+} else {
+    $sortorder="asc";
+}
+$sorturl=$block->getUrl('*/*/invoice');
+
+$total = $paidtotal = $invoicecount = 0;
+$urlParams = ['startdate' => $invstartdate, 'enddate' => $invenddate];
+?>
+<?php if ($invoicesList): ?>
+    <form method="get">
+        <table class="gwinvoicetable data table" border=0>
+            <tr>
+                <td style="font-weight:bold;font-size: 18px;vertical-align: middle;text-align: center;" colspan="2">
+                    <?= __('Start&nbsp;Date') ?>:
+                </td>
+                <td style="vertical-align: middle;"><input type=text id=startdate name=startdate
+                                                           value="<?php echo $invstartdate ?>"></td>
+                <td style="font-weight:bold;font-size: 18px;vertical-align: middle;text-align: center;" colspan="2"><?= __('End&nbsp;Date') ?>:</td>
+                <td style="vertical-align: middle;"><input type=text id=enddate name=enddate
+                                                           value="<?php echo $invenddate ?>"></td>
+                <td style="font-weight:bold;font-size: 18px;vertical-align: middle;text-align: center;" colspan=1><?= __('Ship&nbsp;To') ?>:</td>
+                <td style="font-weight:bold;font-size: 18px;vertical-align: middle;text-align: center;" colspan=1>
+                    <select name="shipto" id="shipto">
+                        <option value="all"><?= __('All') ?></option>
+
+
+                        <?php if (isset($shipToList["SalesShipToListResponseContainerItems"])) { ?>
+                            <?php foreach ($shipToList["SalesShipToListResponseContainerItems"] as $item): ?>
+                                <?php $_selected = ($item["shipto"] == $shipTo) ? "selected" : "" ?>
+                                <option
+                                    value='<?php echo $item["shipto"] ?>' <?php echo $_selected ?>><?php echo $item["name"] ?>
+                                    (<?php echo $item["shipto"] ?>)
+                                </option>
+                            <?php endforeach; ?>
+                        <?php } else { ?>
+
+                            <?php $_selected = "" ?>
+                            <option
+                                value='<?php echo $shipToList["shipto"] ?>' <?php echo $_selected ?>><?php echo $shipToList["name"] ?>
+                                (<?php echo $shipToList["shipto"] ?>)
+                            </option>
+                        <?php } ?>
+                    </select></td>
+                <td style="font-weight:bold;font-size: 18px;vertical-align: middle;text-align: center;" colspan="2">
+                    <button type="submit" class="action primary"><?= __('Submit') ?></button>
+                </td>
+            </tr>
+        </table>
+    </form>
+    <form method="post" action="<?php echo $block->getUrl("*/*/payinvoice") ?>">
+        <table class="gwinvoicetable data table" border="0">
+            <thead>
+            <tr>
+                <th colspan="4" style='text-align:right;padding-right: 28px;vertical-align:top;'>
+                    <a href="#">
+                        <button type="button" onclick="history.go(-1)" class="action subscribe primary"
+                                style="margin: 0 15px 0 -27px;width: 130px;float:left;"><?= __('Back') ?>
+                        </button>
+                    </a>
+                    <a href="<?php echo $block->getUrl('*/*/order', ['_query' => $urlParams]) ?>">
+                        <button type="button" class="action subscribe primary" style="width: 130px;"><?= __('Show Orders') ?>
+                        </button>
+                    </a>
+                <th colspan=9 style='text-align:right;padding-right: 28px;'>
+                    <span class='gwslabel'><input type=hidden id=ordertype name=ordertype value='order'></span>
+                    <span class='gwslabel'><input type=text id='search' name='search'
+                                                  style='width: 235px;margin-right:18px;'> </span>
+                    <button class="action primary" title="<?= __('Search') ?>" type="submit" style="margin-right: -16px;float:right;"><?= __('Search') ?>
+                    </button>
+                </th>
+            </tr>
+            <tr>
+                <th><span style="margin-left: -3px;"><?= __('Pay') ?></span></th>
+                <th><a href="<?php echo $sorturl ?>?sortfield=invno&sortorder=<?php echo $sortorder ?>"><?= __('Invoice') ?>&nbsp;#&nbsp;&#8597;</th>
+                <th style="width: 50px;"><a href="<?php echo $sorturl ?>?sortfield=invsuf&sortorder=<?php echo $sortorder ?>"><?= __('Suffix') ?>&nbsp;&#8597;</th>
+                <?php if (isset($maxrecall)): ?>
+                    <th><?= __('POD') ?></th>
+                <?php else: ?>
+                    <th/>
+                <?php endif; ?>
+                <th ><a href="<?php echo $sorturl ?>?sortfield=invdt&sortorder=<?php echo $sortorder ?>"><?= __('Invoice&nbsp;Date') ?>&nbsp;&#8597;</a></th>
+                <th><a href="<?php echo $sorturl ?>?sortfield=termstype&sortorder=<?php echo $sortorder ?>"><?= __('Terms') ?>&nbsp;&#8597;</a></th>
+                <th><a href="<?php echo $sorturl ?>?sortfield=statustype&sortorder=<?php echo $sortorder ?>"><?= __('Status') ?>&nbsp;&#8597;</a></th>
+                <th><a href="<?php echo $sorturl ?>?sortfield=duedt&sortorder=<?php echo $sortorder ?>"><?= __('Due&nbsp;Date') ?>&nbsp;&#8597;</a></th>
+                <th style="text-align:right;"><a href="<?php echo $sorturl ?>?sortfield=amount&sortorder=<?php echo $sortorder ?>"><?= __('Amt') ?>&nbsp;&#8597;</a></th>
+                <th><a href="<?php echo $sorturl ?>?sortfield=paymtdt&sortorder=<?php echo $sortorder ?>"><?= __('Pmt&nbsp;Date') ?>&nbsp;&#8597;</a></th>
+                <th style="text-align:right;"><a href="<?php echo $sorturl ?>?sortfield=paymtamt&sortorder=<?php echo $sortorder ?>"></a><?= __('Payment&nbsp;Amt') ?>&nbsp;&#8597;</th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php
+            // var_dump ($invoicesList);
+            ?>
+            <?php if (isset($invoicesList['errordesc']) && $invoicesList['errordesc'] != ""): ?>
+
+                <tr>
+                    <td colspan="9"><?php echo __($invoicesList["errordesc"]) ?></td>
+                </tr>
+            <?php elseif (isset($arr)): ?>
+                <?php foreach ($arr as $item): ?>
+                    <?php
+                    if (!$block->invoiceShowable($item, $shipTo, $invstartdate, $invenddate, $hidenegativeinvoice)) {
+                        //continue;
+                    }
+                    
+                    $total += $item["amount"];
+                    $paidtotal += $item["paymtamt"];
+                    $invoicecount++;
+                    ?>
+                    <tr class="invoiceheader">
+                        <td><input type="checkbox" name="paybox<?php echo $invoicecount ?>"
+                                   id="paybox<?php echo $invoicecount ?>">
+                            <input type="hidden" id="payinvoiceno<?php echo $invoicecount ?>"
+                                   name="payinvoiceno<?php echo $invoicecount ?>" value="<?php echo $item["invno"] ?>">
+                            <input type="hidden" id="paysuf<?php echo $invoicecount ?>"
+                                   name="paysuf<?php echo $invoicecount ?>" value="<?php echo $item["invsuf"] ?>">
+                        </td>
+                        <?php
+                        if (isset($_POST["paybox" . $invoicecount]) && isset($_POST["payinvoiceno" . $invoicecount]) && isset($_POST["paysuf" . $invoicecount])) {
+                            if ($_POST["paybox" . $invoicecount] = "on" && $_POST["payinvoiceno" . $invoicecount] == $item["invno"] && $_POST["paysuf" . $invoicecount] == $item["invsuf"]) {
+                                $this->PayInvoice($item["invno"], $item["invsuf"], $item["amount"], false);
+                                $gotocart = true;
+                            }
+                        }
+                        ?>
+                        <td>
+                            <a href="<?php echo $block->getUrl('*/*/invoicedetail',
+                                ['invoice' => $item["invno"], 'invoicesuf' => $item["invsuf"]]) ?>" alt="<?= __('View Invoice') ?>"
+                               title="<?= __('View Invoice') ?>"><?php echo $item["invno"] ?></a>
+                        </td>
+                        <td>0<?php echo $item["invsuf"] ?></td>
+                        <?php if (isset($maxrecall)): ?>
+                            <?php if ($item["amount"] > 0): ?>
+                                <td><a href="<?php echo $block->getUrl('*/*/invoicedetail', [
+                                        'invoice'    => $item["invno"],
+                                        'invoicesuf' => $item["invsuf"],
+                                        'pod'        => '1'
+                                    ]) ?>" alt="View POD" title="View&nbsp;POD"><?= __('View POD') ?></a></td>
+                            <?php else: ?>
+                                <td/>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <td/>
+                        <?php endif; ?>
+                        <td><?php echo (isset($item["invdt"])) ? $item["invdt"] : "" ?></td>
+                        <td><?php echo $item["termstype"] ?></td>
+                        <td><?php echo ($item["statustype"] == "Active") ? "Open" : "Closed"; ?></td>
+                        <td><?php echo (isset($item["duedt"])) ? $item["duedt"] : "" ?></td>
+                        <td align="right"><?php echo $this->helper(Magento\Checkout\Helper\Data::class)->formatPrice(floatval($item["amount"])) ?></td>
+                        <td><?php echo (isset($invoice["paymtdt"])) ? $invoice["paymtdt"] : "" ?></td>
+                        <td align="right"><?php echo $this->helper(Magento\Checkout\Helper\Data::class)->formatPrice(floatval($item["paymtamt"])) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            <?php else: ?>
+
+                <?php
+                $item = $invoicesList;
+                if (!$block->invoiceShowable($item, $shipTo, $invstartdate, $invenddate, $hidenegativeinvoice)):
+                    $total += $item["amount"];
+                    $paidtotal += $item["paymtamt"];
+                    $invoicecount++;
+                    ?>
+                    <tr class="invoiceheader">
+                        <td><input type="checkbox" name="paybox<?php echo $invoicecount ?>"
+                                   id="paybox<?php echo $invoicecount ?>">
+                            <input type="hidden" id="payinvoiceno<?php echo $invoicecount ?>"
+                                   name="payinvoiceno<?php echo $invoicecount ?>" value="<?php echo $item["invno"] ?>">
+                            <input type="hidden" id="paysuf<?php echo $invoicecount ?>"
+                                   name="paysuf<?php echo $invoicecount ?>" value="<?php echo $item["invsuf"] ?>">
+                        </td>
+                        <?php
+                        if (isset($_POST["paybox" . $invoicecount]) && isset($_POST["payinvoiceno" . $invoicecount]) && isset($_POST["paysuf" . $invoicecount])) {
+                            if ($_POST["paybox" . $invoicecount] = "on" && $_POST["payinvoiceno" . $invoicecount] == $item["invno"] && $_POST["paysuf" . $invoicecount] == $item["invsuf"]) {
+                                $this->PayInvoice($item["invno"], $item["invsuf"], $item["amount"], false);
+                                $gotocart = true;
+                            }
+                        }
+
+                        ?>
+                        <td>
+                            <a href="<?php echo $block->getUrl('*/*/invoicedetail',
+                                ['invoice' => $item["invno"], 'invoicesuf' => $item["invsuf"]]) ?>" alt="<?= __('View Invoice') ?>"
+                               title="<?= __('View Invoice') ?>"><?php echo $item["invno"] ?></a>
+                        </td>
+                        <td>0<?php echo $item["invsuf"] ?></td>
+                        <?php if (isset($maxrecall)): ?>
+                            <?php if ($item["amount"] > 0): ?>
+                                <td><a href="<?php echo $block->getUrl('*/*/invoicedetail', [
+                                        'invoice'    => $item["invno"],
+                                        'invoicesuf' => $item["invsuf"],
+                                        'pod'        => '1'
+                                    ]) ?>" alt="View POD" title="View&nbsp;POD"><?= __('View POD') ?></a></td>
+                            <?php else: ?>
+                                <td/>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <td/>
+                        <?php endif; ?>
+                        <td><?php echo (isset($item["invdt"])) ? $item["invdt"] : "" ?></td>
+                        <td><?php echo $item["termstype"] ?></td>
+                        <td><?php echo ($item["statustype"] == "Active") ? "Open" : "Closed"; ?></td>
+                        <td><?php echo (isset($item["duedt"])) ? $item["duedt"] : "" ?></td>
+                        <td align="right"><?php echo $this->helper(Magento\Checkout\Helper\Data::class)->formatPrice(floatval($item["amount"])) ?></td>
+                        <td><?php echo (isset($invoice["paymtdt"])) ? $invoice["paymtdt"] : "" ?></td>
+                        <td align="right"><?php echo $this->helper(Magento\Checkout\Helper\Data::class)->formatPrice(floatval($item["paymtamt"])) ?></td>
+                    </tr>
+                <?php endif; ?>
+            <?php endif; ?>
+            </tbody>
+            <tfoot>
+            <tr>
+                <td>
+                    <input type="hidden" id="startdate" name="startdate" value="<?php echo $invstartdate ?>">
+                    <input type="hidden" id="enddate" name="enddate" value="<?php echo $invenddate ?>">
+                    <input type="hidden" name="recordcount" id="recordcount" value="<?php echo $invoicecount ?>">
+                    <button class="action primary" title="Pay" value="Pay" type="submit"><?= __('Pay') ?></button>
+                </td>
+                <td colspan="7" align="right"><strong><?= __('Invoice&nbsp;Total') ?>:</td>
+                <td align="right"><?php echo $this->helper(Magento\Checkout\Helper\Data::class)->formatPrice(floatval($total)) ?></td>
+                <td align="right"><strong><?= __('Paid&nbsp;Total') ?>:</strong></td>
+                <td align="right"><?php echo $this->helper(Magento\Checkout\Helper\Data::class)->formatPrice(floatval($paidtotal)) ?></td>
+            </tr>
+            </tfoot>
+        </table>
+    </form>
+<?php else: ?>
+    <table class="gwinvoicetable data table" border="0">
+        <tr>
+            <td><br><?= __('No invoices found.') ?><br></td>
+        </tr>
+    </table>
+<?php endif; ?>

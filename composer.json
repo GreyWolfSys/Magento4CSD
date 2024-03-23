@@ -1,0 +1,25 @@
+{
+    "name": "greywolf/altitude4csd",
+    "description": "Altitude for CSD",
+    "type": "magento2-module",
+    "version": "4.3.0",
+    "minimum-stability": "dev",
+    "require": {
+            "php": ">=8.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Altitude\\CSD\\": ""
+        },
+        "files": [
+            "registration.php"
+        ]
+    },
+	
+	"repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/GreyWolfSys/Altitude4CSD.git"
+    }
+  ]
+}

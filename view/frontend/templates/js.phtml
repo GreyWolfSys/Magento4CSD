@@ -1,0 +1,29 @@
+<script type="text/javascript">
+    require([
+        'jquery'
+    ], function ($) {
+
+        $(document).ready(function () {
+            $('.price').not('.gwinvoicetable .price').contents().filter(function () {
+                return this.nodeType == 3;
+            }).each(function () {
+                this.textContent = this.textContent.replace('CA$0.00', '<?= __('Select option to see price') ?>');
+                this.textContent = this.textContent.replace('$0.00', '<?= __('Select option to see price') ?>');
+            });
+
+            if ($('div.price-final_price .normal-price .price-container .price-wrapper .price:first')
+                .length) {
+                $('div.price-final_price .normal-price .price-container .price-wrapper .price:first')
+                    .html(
+                        $('div.price-final_price .normal-price .price-container .price-wrapper .price:first')
+                        .html().replace('CA$0.00', '<?= __('Select option to see price') ?>')
+                    );
+                $('div.price-final_price .normal-price .price-container .price-wrapper .price:first')
+                    .html(
+                        $('div.price-final_price .normal-price .price-container .price-wrapper .price:first')
+                        .html().replace('$0.00', '<?= __('Select option to see price') ?>')
+                    );
+            }
+        })
+    });
+</script>

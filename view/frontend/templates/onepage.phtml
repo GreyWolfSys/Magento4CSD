@@ -1,0 +1,164 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+
+/** @var $block \Magento\Checkout\Block\Onepage */
+?>
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$helperData = $objectManager->get('\Altitude\CSD\Helper\Data');
+$warningMsg = __($helperData->getConfigData('shipping_upcharge/inventory_availabilities/shipping_msg'));
+$isavailable = __($helperData->getConfigData('shipping_upcharge/inventory_availabilities/is_dis_inventory_availability'));
+?>
+<div id="checkout" data-bind="scope:'checkout'" class="checkout-container">
+    <div id="checkout-loader" data-role="checkout-loader" class="loading-mask" data-mage-init='{"checkoutLoader": {}}'>
+        <div class="loader">
+            <img src="<?= $block->escapeUrl($block->getViewFileUrl('images/loader-1.gif')) ?>"
+                 alt="<?= $block->escapeHtmlAttr(__('Loading...')) ?>"
+                 style="position: absolute;">
+        </div>
+    </div>
+    <!-- ko template: getTemplate() --><!-- /ko -->
+    <script type="text/x-magento-init">
+        {
+            "#checkout": {
+                "Magento_Ui/js/core/app": <?= /* @noEscape */ $block->getJsLayout() ?>
+            }
+        }
+    </script>
+    <script>
+        window.checkoutConfig = <?= /* @noEscape */ $block->getSerializedCheckoutConfig() ?>;
+        // Create aliases for customer.js model from customer module
+        window.isCustomerLoggedIn = window.checkoutConfig.isCustomerLoggedIn;
+        window.customerData = window.checkoutConfig.customerData;
+    </script>
+    <script>
+        require([
+            'mage/url',
+            'Magento_Ui/js/block-loader'
+        ], function(url, blockLoader) {
+            blockLoader("<?= $block->escapeJs($block->escapeUrl($block->getViewFileUrl('images/loader-1.gif'))) ?>");
+            return url.setBaseUrl('<?= $block->escapeJs($block->escapeUrl($block->getBaseUrl())) ?>');
+        })
+    </script>
+</div>
+<?php if($isavailable): ?>
+<script type="text/javascript">
+    require(['jquery'], function ($) {
+        
+        var interval = setInterval(function () {
+            if($(".checkout-shipping-address") && $(".checkout-shipping-address").find(".custom-msg-data") && $(".checkout-shipping-address").find(".custom-msg-data").length <= 0){
+                $(".checkout-shipping-address").prepend("<lable class='custom-msg-data vvv' style='display:none'><?php echo $warningMsg; ?></label>");
+            }
+            
+        }, 1000);
+        
+        
+        $(document).on("click", '.action-select-shipping-item', function(event) { 
+            $('.custom-msg-data.vvv').show();
+            
+            $('.opc-block-summary .product-item').each(function(i) {
+             $(this).attr('id',i);
+            });
+            
+            var regionname = jQuery('.shipping-address-item.selected-item > span[data-bind="text: address().region"]').text();
+            customqtycheckout(regionname);
+            
+        });
+        
+        $(document).on("change", 'select[name="region_id"]', function(event) { 
+            var regionname_val = jQuery('select[name="region_id"] option:selected').val();
+            if(regionname_val){
+            var regionname_dd = jQuery('select[name="region_id"] option:selected').text();
+                var mty = "";
+            $.ajax({
+            	url: "<?php echo $this->getUrl('csd/index/index') ?>",
+            	type: "GET",
+            	async: false,
+            	data: {
+            		regioncode: regionname_dd,
+            		isAjax: true
+            	}
+            }).done(function(msg) {
+            	$('#customqtycheckout').html(msg.output);
+                	customqtycheckout(mty);
+            });
+            }
+        });
+        
+        $(document).ready(function() {
+            var setinterval = setInterval(function () {
+                $('.opc-block-summary .product-item').each(function(i) {
+                 $(this).attr('id',i);
+                });
+                
+                $('.customqty .itemavailqty').each(function(i) {
+                   var itemposi = $(this).attr('itemposi');
+                   var itemhtm = $(this).html();
+                   if($(".opc-block-summary .product-item[id='"+itemposi+"']").find('div.addeditemqty').length == 0){
+                        $(".opc-block-summary .product-item[id='"+itemposi+"'] .product-item-name-block").append(itemhtm);
+                   }
+                });
+
+            }, 1500);
+
+        });
+        
+        function customqtycheckout(regionname){
+            if(regionname){
+                jQuery(document).find('.addr_region[data-region="'+regionname+'"] .itemavailqty').each(function(i) {
+                	var itemposi = jQuery(this).attr('itemposi');
+                	var itemhtm = jQuery(this).html();
+                	jQuery(".opc-block-summary .product-item[id='"+itemposi+"'] .product-item-name-block .addeditemqty").replaceWith(itemhtm);
+                });
+            }else{
+            jQuery(document).find('#customqtycheckout .itemavailqty').each(function(i) {
+            	var itemposi = jQuery(this).attr('itemposi');
+            	var itemhtm = jQuery(this).html();
+            	jQuery(".opc-block-summary .product-item[id='"+itemposi+"'] .product-item-name-block .addeditemqty").replaceWith(itemhtm);
+            });
+            }
+        }
+        
+    });
+</script>
+<style>
+#shipping lable.custom-msg-data {
+    color: #ff5501;
+    line-height: 40px;
+    font-weight: 600;
+}
+.addeditemqty {
+    display: inline-flex;
+}
+</style>
+
+<?php
+$objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+$cart2 = $objectManager->get('Magento\Checkout\Model\Session');  
+$resignName = $cart2->getQuote()->getShippingAddress()->getRegion();
+?>
+<script>
+   require(['jquery', 'jquery/ui'], function($){
+		$( document ).ready(function() {
+		  var existCondition = setInterval(function() {
+		   if (jQuery('#checkout').find('.shipping-address-item.selected-item > span[data-bind="text: address().region"]').length) {
+			clearInterval(existCondition);
+			runMyFunction();
+		   }
+		  }, 100);
+		  function runMyFunction(){
+			    var regionname_dd = jQuery('.shipping-address-item.selected-item > span[data-bind="text: address().region"]').text();
+                var selectedregion = '<?php echo $resignName; ?>';
+                if(regionname_dd !== selectedregion){
+                    jQuery('#checkout').find('.shipping-address-items .shipping-address-item.not-selected-item > .action-select-shipping-item').click();
+                }
+		  }
+		});
+	 });
+</script>
+<?php endif; ?>
+
+

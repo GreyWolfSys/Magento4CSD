@@ -1,0 +1,19 @@
+<page layout="2columns-left" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <update handle="customer_account"/>
+    <body>
+        <referenceBlock name="csd-customer-account-navigation-orders">
+            <arguments>
+                <argument name="current" xsi:type="boolean">true</argument>
+            </arguments>
+        </referenceBlock>
+        <referenceBlock name="page.main.title">
+            <action method="setPageTitle">
+                <argument translate="true" name="title" xsi:type="string">Orders</argument>
+            </action>
+        </referenceBlock>
+        <referenceContainer name="content">
+            <block class="Altitude\CSD\Block\Invoicedetail" name="csd_invoice_detail" template="Altitude_CSD::invoice/detail.phtml" cacheable="false">
+            </block>
+        </referenceContainer>
+    </body>
+</page>

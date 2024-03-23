@@ -1,0 +1,40 @@
+.gworderbodytable td {
+    padding: 3px 10px 3px;
+    border-top: 0px !important;
+}
+
+.customer-balance,
+.customer-shipto-list {
+    padding-bottom: 20px;
+}
+
+.block-dashboard-orders,
+.block-compare {
+    display: none !important;
+}
+
+.gwinvoicebodytable td {
+    padding: 3px 10px 3px;
+    border-top: 0px !important;
+}
+
+.gwslabel {
+    font-weight: bold;
+}
+
+.gwsvalue {
+    font-weight: notmal;
+}
+
+.price-label {
+    display: none !important;
+}
+
+@media (min-width: 768px) {
+
+    .page-header.type15 .navigation li.level0.fullwidth .submenu a,
+    .page-header.type15 .navigation li.level0.classic .submenu a,
+    .page-header.type15 .navigation li.level0.staticwidth .submenu a {
+        line-height: 10px !important;
+    }
+}

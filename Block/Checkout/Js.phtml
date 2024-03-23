@@ -1,0 +1,6 @@
+<?php
+$_helper = $this->helper('Altitude\CSD\Helper\Data');
+?>
+<script>
+    window.isAbleToEditAddress = <?=  /* @escapeNotVerified */ (int) $_helper->isAbleToEditAddress() ?>;
+</script>

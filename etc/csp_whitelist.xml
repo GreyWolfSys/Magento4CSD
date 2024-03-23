@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp:etc/csp_whitelist.xsd">
+    <policies>
+        <policy id="frame-src">
+            <values>
+                <value id="self" type="host">https://www.google.com</value>
+            </values>
+        </policy>
+        <policy id="font-src">
+            <values>
+                <value id="self" type="host">https://fonts.gstatic.com</value>
+            </values>
+        </policy>
+        <policy id="style-src">
+            <values>
+                <value id="self" type="host">http://fonts.googleapis.com</value>
+            </values>
+        </policy>
+        <policy id="script-src">
+            <values>
+                <value id="hsforms" type="host">https://js.hsforms.net</value>
+            </values>
+        </policy>
+        <policy id="connect-src">
+            <values>
+                <value id="hsforms_forms" type="host">https://forms.hsforms.com</value>
+                <value id="self" type="host">https://hubspot-forms-static-embed.s3.amazonaws.com</value>
+            </values>
+        </policy>
+        <policy id="img-src">
+            <values>
+                <value id="hsforms_forms_image" type="host">https://forms.hsforms.com</value>
+                <value id="self" type="host">https://forms-na1.hsforms.com</value>
+            </values>
+        </policy>
+    </policies>
+</csp_whitelist>

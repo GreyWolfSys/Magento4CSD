@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../lib/internal/Magento/Framework/Event/etc/events.xsd">
+
+	<event name="customer_register_success">
+		<observer name="customer_login_observer" instance="Altitude\CSD\Observer\CustomerRegister" />
+	</event>
+	    <event name="sales_order_invoice_save_after">
+        <observer name="belvg_verpage_controller_front_send_response_before" instance="Altitude\CSD\Model\GWCart"  />
+    </event>
+    <event name="checkout_submit_all_after123">
+        <observer name="belvg_verpage_controller_front_send_response_before2" instance="Altitude\CSD\Model\GWCartOrder"  />
+    </event>
+     <event name="checkout_onepage_controller_success_action">
+        <observer name="belvg_verpage_controller_front_send_response_before3" instance="Altitude\CSD\Model\GWCartOrder"  />
+         <observer name="gw_multorder_checkout_onepage_controller_success_action" instance="Altitude\CSD\Observer\SuccessCSD"  />
+    </event>
+	<event name="sales_order_place_before">
+        <observer name="gw_checkfordupepo" instance="Altitude\CSD\Model\POCheck"  />
+    </event>
+    <event name="sales_model_service_quote_submit_before">
+        <observer name="gw_shipping_upcharge" instance="Altitude\CSD\Observer\AddFeeToOrderObserver" />
+		<!-- <observer name="gw_authorized_amount" instance="Altitude\CSD\Observer\AddFeeToOrderObserver" /> -->
+    </event>
+
+    <event name="sales_quote_address_collect_totals_before">
+        <observer name="save_after_quote_Address" instance="Altitude\CSD\Observer\TotalsAfterEvent" />
+    </event>
+	<event name="sales_order_invoice_save_after123">
+		<observer instance="Altitude\CSD\Observer\Sales\OrderInvoiceSaveAfter" name="greywolfsystems_csdpayments_observer_sales_orderinvoicesaveafter_sales_order_invoice_save_after"/>
+	</event>
+
+    <event name="payment_method_is_active">
+        <observer instance="Altitude\CSD\Observer\Payment\MethodIsActive" name="greywolfsystems_csdhidepayment_observer_payment_methodisactive_payment_method_is_active"/>
+    </event>
+	    <event name="catalog_product_get_final_price">
+        <observer name="belvg_verpage_controller_front_send_response_before1" instance="Altitude\CSD\Model\GetCSDPrice"  />
+    </event>
+	<event name="catalog_product_collection_load_after">
+		<observer name="belvg_verpage_controller_front_send_response_before6" instance="Altitude\CSD\Model\GetCSDPrice"  />
+	</event>
+    <event name="customer_login">
+        <observer name="gw_customer_login_observer" instance="Altitude\CSD\Observer\CustomerLogin" />
+    </event>
+
+
+</config>

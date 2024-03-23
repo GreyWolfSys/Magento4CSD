@@ -1,0 +1,107 @@
+<?php extract($block->getBalances()); ?>
+<?php if (!$csdCustomer): ?>
+	<div>Error retrieving results.</div>
+<?php else: ?>
+	<?php
+    	if ($csdCustomer["custno"]==$csdcustomerid){
+            ?>
+                <div><?= __('Page unavailable for your account.') ?></div>
+            <?php
+            return "";
+        }
+		if (isset($csdCustomer["lastpaydt"])) {
+			$lastpaydt = $csdCustomer["lastpaydt"];
+		} else {
+			$lastpaydt = __("N/A");
+		}
+	?>
+	<div class="customer-balance">
+		<div>
+			<span class='gwslabel'><strong><?= __('Name') ?>: </strong></span>
+			<span class='gwsvalue'><?php echo $csdCustomer["name"] ?></span>
+		</div>
+		<div>
+			<span class='gwslabel'><strong><?= __('Terms') ?>: </strong></span>
+			<span class='gwsvalue'><?php echo $csdCustomer["termsdesc"] ?></span>
+		</div>
+		<div>
+			<span class='gwslabel'><strong><?= __('Last Payment') ?>: </strong></span>
+			<span class='gwsvalue'><?php echo $lastpaydt ?> - <?php echo $this->helper(Magento\Checkout\Helper\Data::class)->formatPrice($csdCustomer["lastpayamt"]); ?></span>
+		</div>
+		<div>
+			<span class='gwslabel'><strong><?= __('Balance') ?>: </strong></span>
+			<span class='gwsvalue'><?php echo $this->helper(Magento\Checkout\Helper\Data::class)->formatPrice($csdCustomer["totalbalance"]) ?></span>
+		</div>
+	</div>
+
+	<?php if ($shipToList): ?>
+		<form method='get' class="customer-shipto-list">
+			<span class='gwslabel'><strong><?= __('Ship To') ?>: </strong></span>
+			<span class='gwsvalue'>
+				<select width='384px' style='width:384px;' id=shipto name=shipto><option value=''></option>
+				<?php if (!isset($shipToList["errordesc"])): ?>
+					<?php foreach ($shipToList["SalesShipToListResponseContainerItems"] as $item): ?>
+						<?php $_selected = ($item["shipto"] == $selectedShipTo) ? "selected" : ""; ?>
+						<option value='<?php echo $item["shipto"] ?>' <?php echo $_selected ?>>
+							<?php echo $item["name"] ?> (<?php echo $item["shipto"] ?>)
+						</option>
+					<?php endforeach; ?>
+				<?php elseif (isset($shipToList["shipto"]) && isset($shipToList["name"])): ?>
+					<?php $_selected = ($shipToList["shipto"] == $selectedShipTo) ? "selected" : ""; ?>
+					<option value='<?php echo $shipToList["shipto"] ?>' <?php echo $_selected ?>>
+						<?php echo $shipToList["name"] ?>
+					</option>
+				<?php endif; ?>
+				</select>
+				<button class="action primary" title="Filter" type="submit"><?= __('Filter') ?></button>
+			</span>
+		</form>
+	<?php endif; ?>
+
+	<?php if ($shipTo): ?>
+		<?php $totalbalance = 0; ?>
+		<div>
+			<span class='gwslabel'><?= __('Name') ?>:</span>
+			<span class='gwsvalue'><?php echo $shipTo["name"] ?></span>
+		</div>
+		<div>
+			<span class='gwslabel'><?= __('Terms') ?>:</span>
+			<span class='gwsvalue'><?php echo $shipTo["termsdesc"] ?></span>
+		</div>
+
+		<?php if (!empty($shipTo["lastagedt"])): ?>
+			<div>
+				<span class='gwslabel'><?= __('Last Aged') ?>:</span>
+				<span class='gwsvalue'><?php echo $shipTo["lastagedt"] ?></span>
+			</div>
+		<?php endif; ?>
+
+		<?php foreach ($balances as $index => $_balance): ?>
+			<?php if (!empty($shipTo["lastagedt"])): ?>
+				<?php
+					if (isset($_balance['is_index'])) {
+						$label = $shipTo[$_balance['label']] . " " . __("Balance");
+					} else {
+						$label = $_balance['label'];
+					}
+
+					if ($_balance['is_minus']) {
+						$totalbalance -= $shipTo[$index];
+                    } else {
+                        $totalbalance += $shipTo[$index];
+                    }
+				?>
+				<div>
+					<span class='gwslabel'><?php echo __($label) ?>:</span>
+					<span class='gwsvalue'><?php echo $this->helper(Magento\Checkout\Helper\Data::class)->formatPrice($shipTo[$index]) ?></span>
+				</div>
+			<?php endif; ?>
+		<?php endforeach; ?>
+
+		<div>
+			<span class='gwslabel'><?= __('Total Balance') ?>: </span>
+			<span class='gwsvalue'><?php echo $this->helper(Magento\Checkout\Helper\Data::class)->formatPrice($totalbalance) ?></span>
+		</div>
+	<?php endif; ?>
+
+<?php endif; ?>

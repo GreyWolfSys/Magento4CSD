@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+	<type name="Magento\Checkout\Model\ShippingInformationManagement">
+        <plugin name="gws_save_authorized_amount_in_quote" type="Altitude\CSD\Plugin\Checkout\ShippingInformationManagement" sortOrder="1"/>
+    </type>
+	<type name="Magento\Framework\Console\CommandList">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="fetchPrice" xsi:type="object">Altitude\CSD\Console\FetchPrice</item>
+            </argument>
+        </arguments>
+    </type>
+
+	<preference for="Magento\Checkout\Block\Onepage\Success" type="Altitude\CSD\Block\Success"/>
+
+    <preference for="Magento\Sales\Controller\Adminhtml\Order\View" type="Altitude\CSD\Controller\Adminhtml\Order\View"/>
+
+    <preference for="Magento\Tax\Model\Sales\Total\Quote\Tax" type="Altitude\CSD\Model\SalesTotalTax"/>
+
+    <preference for="Magento\Ups\Model\Carrier" type="Altitude\CSD\Model\Carrier\Ups" />
+    <preference for="Magento\Usps\Model\Carrier" type="Altitude\CSD\Model\Carrier\Usps" />
+    <preference for="Magento\Fedex\Model\Carrier" type="Altitude\CSD\Model\Carrier\Fedex" />
+    <preference for="Magento\Dhl\Model\Carrier" type="Altitude\CSD\Model\Carrier\Dhl" />
+
+    <preference for="Magento\Checkout\Block\Onepage\Link" type="Altitude\CSD\Block\Onepage\Link" />
+	<preference for="Magento\CatalogSearch\Controller\Result\Index" type="Altitude\CSD\Controller\Result\Index" />
+
+    <type name="Magento\Checkout\Block\Cart\Grid">
+        <plugin name="module_checkout_cart_grid_override_template" type="Altitude\CSD\Block\Checkout\Cart\Grid" />
+    </type>
+</config>

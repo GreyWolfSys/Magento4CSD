@@ -1,0 +1,57 @@
+<script type="text/javascript">
+require([
+    'jquery',
+    'mage/translate'
+], function ($) {
+    $(document).ready(function() {
+        var simpleSku = $("div[itemprop='sku']").text();
+        var url= BASE_URL + "/altitudecsd/index/getajax";
+        var basePrice = 0;
+        var currentCurrencyCode = 'USD';
+
+        console.log('checking price//...');
+        $.ajax({
+            url: url,
+            type: "GET",
+            data: {
+                sku: simpleSku,
+            }
+        }).done(function(msg) {
+            var data = JSON.parse(msg);
+
+            basePrice = parseFloat(data.result);
+            currentCurrencyCode = data.currentCurrencyCode;
+            localeCode = data.localeCode;
+
+            var currencyPrefix = '';
+            if(currentCurrencyCode == 'CAD' && localeCode == 'en_US') {
+                currencyPrefix = 'CA';
+            }
+
+            var formatter = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2,
+            });
+
+            console.log('price=' + basePrice);
+            if (basePrice>0) {
+                console.log('setting price');
+                basePrice = currencyPrefix + formatter.format(basePrice);
+                $('.product-info-price .price-box .price-container .price').html(basePrice);
+                $('div.price-final_price .normal-price .price-container .price-wrapper .price:first').html(basePrice);
+                $('.sticky-price .price-box .price-container .price').html(basePrice);
+                $('.product-info-price .price-box .price-container .price-wrapper:first ').data('priceAmount', basePrice)
+                console.log('done setting price');
+            }
+
+            $('.price').contents().filter(function() {
+                return this.nodeType == 3
+            }).each(function() {
+                this.textContent = this.textContent.replace('CA$0.00', $.mage.__('Select option to see price'));
+                this.textContent = this.textContent.replace('$0.00', $.mage.__('Select option to see price'));
+            });
+        });
+    });
+});
+</script>

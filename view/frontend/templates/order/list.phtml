@@ -1,0 +1,176 @@
+<?php
+extract($this->getOrders());
+if (isset($ordersList["SalesOrderListResponseContainerItems"])) {
+    $arr=$ordersList["SalesOrderListResponseContainerItems"];
+    
+} 
+if (isset($_REQUEST["sortfield"])){
+    // if (1==1){
+    $arr=$this->array_sort_by_column($arr,$_REQUEST["sortfield"],$_REQUEST["sortorder"]);
+    //var_dump($ordersList["SalesOrderListResponseContainerItems"]);
+}
+    //error_log("Checking owned orders: " . $ownedOrders);
+    if (!empty($ownedOrders)){
+        //error_log("oo set" . $ownedOrders);
+        if (isset($arr)){
+            //error_log("arr set");
+            foreach ($arr as  $key =>$item){
+                //error_log("o=" . $item["orderno"]);
+                if (strpos($ownedOrders,$item["orderno"])===false){
+                 //error_log("removing " . $item["orderno"]);
+                 //$arr = array_diff($arr, $item);
+                   // unset($item);
+                    unset($arr[$key]);
+                }
+                
+            }
+        }
+    } 
+    
+    if ($ownedOrders =="|" ){
+        //no orders found that are owned
+        error_log("no orders found");
+       $ordersList=false;
+        //return "";
+    }
+    
+$sortorder="";
+//echo $_REQUEST["sortorder"] . "<br>";
+if (!isset($_REQUEST["sortorder"])){
+    $sortorder="asc";
+}elseif ($_REQUEST["sortorder"]=="asc"){
+    $sortorder="desc";
+} else {
+    $sortorder="asc";
+}
+$sorturl=$block->getUrl('*/*/order');
+
+$total = 0;
+$urlParams = ['startdate' => $invstartdate, 'enddate' => $invenddate];
+
+
+//echo $sortorder;
+
+?>
+<form method="get">
+        <table class="gwordertable data table" border=0>
+            <tr>
+                <td style="font-weight:bold;font-size: 18px;vertical-align: middle;text-align: center;" colspan="2"><?= __('Start&nbsp;Date') ?>:</td>
+                <td style="vertical-align: middle;"><input type=text id=startdate name=startdate value="<?php echo $invstartdate ?>"></td>
+                <td style="font-weight:bold;font-size: 18px;vertical-align: middle;text-align: center;" colspan="2"><?= __('End&nbsp;Date') ?>:</td>
+                <td style="vertical-align: middle;"><input type=text id=enddate name=enddate value="<?php echo $invenddate ?>"></td>
+                <td style="font-weight:bold;font-size: 18px;vertical-align: middle;text-align: center;" colspan="2">
+                    <button type="submit" class="action primary"><?= __('Submit') ?></button>
+                </td>
+            </tr>
+        </table>
+    </form>
+<?php if($ordersList ): ?>
+    
+    <form method="post">
+        <table class="gwordertable data table" border="0">
+            <thead>
+            <tr>
+                <th colspan=4 style='text-align:right;padding-right: 28px;vertical-align:top;'>
+                    <a href="#"><button type="button"  onclick="history.go(-1)" class="action subscribe primary" style="margin: 0 15px 0 -27px;width: 130px;float: left;"><?= __('Back') ?></button></a>
+                    <a href="<?php echo $block->getUrl('*/*/invoice', ['_query' => $urlParams]) ?>"><button type="button" class="action subscribe primary" style="width: 130px;"><?= __('Show Invoices') ?></button></a>
+                <th colspan=9 style='text-align:right;padding-right: 28px;vertical-align:top;'>
+                    <span class='gwslabel'><input type=hidden id=ordertype name=ordertype value='order'></span>
+                    <span class='gwslabel'><input type=text id='search' name='search' style='width: 235px;margin-right:18px;'> </span>
+                    <button class="action primary" title="<?= __('Search') ?>" type="submit" value="<?= __('Search') ?>" style="margin-right: -16px;float:right;"><?= __('Search') ?></button>
+                </th>
+            </tr>
+            <tr class="order-table-header">
+
+
+                <th data-sorttype="order-number" data-sortposition="desc"><a href="<?php echo $sorturl ?>?sortfield=orderno&sortorder=<?php echo $sortorder ?>"><?= __('Order Number') ?>&nbsp;&#8597;</a></th>
+                <th data-sorttype="suffix" data-sortposition="asc"><a href="<?php echo $sorturl ?>?sortfield=ordersuf&sortorder=<?php echo $sortorder ?>"><?= __('Suffix') ?>&nbsp;&#8597;</a></th>
+                <th data-sorttype="date" data-sortposition="asc"><a href="<?php echo $sorturl ?>?sortfield=enterdt&sortorder=<?php echo $sortorder ?>"><?= __('Date') ?>&nbsp;&#8597;</a></th>
+                <th data-sorttype="po" data-sortposition="asc"><a href="<?php echo $sorturl ?>?sortfield=custpo&sortorder=<?php echo $sortorder ?>"><?= __('PO&nbsp;#') ?>&nbsp;&#8597;</a></th>
+                <th data-sorttype="order-type" data-sortposition="asc"><a href="<?php echo $sorturl ?>?sortfield=transtype&sortorder=<?php echo $sortorder ?>"><?= __('Order&nbsp;Type') ?>&nbsp;&#8597;</a></th>
+                <th data-sorttype="terms" data-sortposition="asc"><a href="<?php echo $sorturl ?>?sortfield=termsdesc&sortorder=<?php echo $sortorder ?>"><?= __('Terms') ?>&nbsp;&#8597;</a></th>
+                <th data-sorttype="stage" data-sortposition="asc"><a href="<?php echo $sorturl ?>?sortfield=stagedesc&sortorder=<?php echo $sortorder ?>"><?= __('Stage') ?>&nbsp;&#8597;</a></th>
+                <th data-sorttype="promise-date" data-sortposition="asc"><a href="<?php echo $sorturl ?>?sortfield=promisedt&sortorder=<?php echo $sortorder ?>"><?= __('Promise&nbsp;Date') ?>&nbsp;&#8597;</a></th>
+                <th data-sorttype="amount" style="text-align:right;" data-sortposition="asc"><a href="<?php echo $sorturl ?>?sortfield=totlineamt&sortorder=<?php echo $sortorder ?>"><?= __('Amount') ?>&nbsp;&#8597;</a></th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <?php if (isset($ordersList['errordesc']) && $ordersList['errordesc'] != ""): ?>
+                <tr><td colspan="9"><?php echo $ordersList["errordesc"] ?></td></tr>
+            <?php elseif (isset($arr)): ?>
+                <?php foreach ($arr as $item): ?>
+                    <?php
+                  //  var_dump($item);
+                    if (!isset($item["enterdt"]) || !isset($item["orderno"])) {
+                        continue;
+                    }
+                    $total += $item["totlineamt"];
+                    ?>
+                    <tr class="orderheader">
+                        <td data-th="Order Number">
+                            <a href="<?php echo $block->getUrl('*/*/orderdetail', ['order' => $item["orderno"], 'ordersuf' => $item["ordersuf"]]) ?>" alt="View Order" title="View Order"><?php echo $item["orderno"] ?></a>
+                        </td>
+                        <td data-th="suffix">0<?php echo $item["ordersuf"] ?></td>
+                        <td data-th="date"><?php echo $item["enterdt"] ?></td>
+                        <td data-th="po #"><?php echo isset($item["custpo"]) ? $item["custpo"] : ""?></td>
+                        <td data-th="order-type"><?php echo __($item["typedesc"]) ?></td>
+                        <td data-th="terms"><?php echo isset($item["termsdesc"]) ? $item["termsdesc"] : "" ?></td>
+                        <td data-sorttype="stage" data-sortposition="asc"><?php echo __($item["stagedesc"]) ?></td>
+                        <td data-th="date"><?php echo isset($item["promisedt"]) ? $item["promisedt"] : "" ?></td>
+                        <td data-th="amount" align="right"><?php echo $this->helper(Magento\Checkout\Helper\Data::class)->formatPrice(floatval($item["totlineamt"])) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <?php
+                $item = $ordersList;
+                $total += $item["totlineamt"];
+                ?>
+                <tr class="orderheader">
+                    <td data-th="Order Number">
+                        <a href="<?php echo $block->getUrl('*/*/orderdetail', ['order' => $item["orderno"], 'ordersuf' => $item["ordersuf"]]) ?>" alt="View Order" title="View Order"><?php echo $item["orderno"] ?></a>
+                    </td>
+                    <td data-th="suffix"><?php echo $item["ordersuf"] ?></td>
+                    <td data-th="date"><?php echo $item["enterdt"] ?></td>
+                    <td data-th="po #"><?php echo isset($item["custpo"]) ? $item["custpo"] : ""  ?></td>
+                    <td data-th="order-type"><?php echo $item["typedesc"] ?></td>
+                    <td data-th="terms"><?php echo $item["termsdesc"] ?></td>
+                    <td data-th="stage"><?php echo $item["stagedesc"] ?></td>
+                    <td data-th="date"><?php echo $item["promisedt"] ?></td>
+                    <td data-th="amount" align="right"><?php echo $this->helper(Magento\Checkout\Helper\Data::class)->formatPrice(floatval($item["totlineamt"])) ?></td>
+                </tr>
+            <?php endif; ?>
+            </tbody>
+            <tfoot>
+            <tr>
+                <td colspan="8" align="right"><strong><?= __('Order&nbsp;Total') ?>:</td>
+                <td align="right"><?php echo $this->helper(Magento\Checkout\Helper\Data::class)->formatPrice(floatval($total)) ?></td>
+            </tr>
+            </tfoot>
+        </table>
+    </form>
+<?php else: ?>
+    <table class="gwordertable data table" border="0">
+        <tr>
+            <td><br>No orders found.<br></td>
+        </tr>
+    </table>
+<?php endif; ?>
+
+<script type="text/javascript">
+    require(['jquery'], function($) {
+        $('.gwordertable .order-table-header th').on('click',function(){
+            $.ajax({
+                context: '#ajaxresponse',
+                url: AjaxUrl,
+                type: "POST",
+                data: {currentproduct:CurrentProduct},
+            }).done(function (data) {
+                $('#ajaxresponse').html(data.output);
+                return true;
+            });
+            console.log($(this).data('sorttype'));
+            console.log($(this).data('sortposition'));
+        })
+    })
+</script>
