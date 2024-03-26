@@ -693,52 +693,25 @@ class CSD extends \Magento\Framework\Model\AbstractModel
         }
     }
 
-    public function SalesCustomerPricingList($cono, $custno, $whse, $shipto, $qty, $productlist, $moduleName = "")
-    {//status=bad, save for next version_compare
-        return "";
+    public function SalesCustomerPricingList($cono, $custno, $shipto, $params, $moduleName = "")
+    {
+        
         $apiname = "SalesCustomerPricingList";
         $this->LogAPICall($apiname);
 
         try {
             $apikey = $this->getConfigValue('apikey');
+            $operinit = $this->getConfigValue('operinit');
             $client = $this->createSoapClient($apikey, $apiname);
 
-            $paramsHead = new ArrayObject();
-            $thisparam = array(
-                'cono' => $cono,
-                'custno' => $custno,
-                'whse' => $whse,
-                'shipto' => $shipto,
-                'qty' => $qty,
-                'APIKey' => $apikey
-            );
-            $params[] = new \SoapVar($thisparam, SOAP_ENC_OBJECT);
-            /* $paramsHead[] = new SoapVar($cono, XSD_DECIMAL, null, null, 'cono');
-             $paramsHead[] = new SoapVar($apikey, XSD_STRING, null, null, 'APIKey');
-             $paramsHead[] = new SoapVar($custno, XSD_STRING, null, null, 'custno');
-             $paramsHead[] = new SoapVar($whse, XSD_STRING, null, null, 'whse');
-             $paramsHead[] = new SoapVar($shipto, XSD_STRING, null, null, 'shipto');
-             $paramsHead[] = new SoapVar($qty, XSD_STRING, null, null, 'qty');*/
+             $paramsHead[] = new SoapVar($cono, XSD_DECIMAL, null, null, 'cono');
+             $params[] = new SoapVar($operinit, XSD_DECIMAL, null, null, 'operinit');
+             $params[] = new SoapVar($apikey, XSD_STRING, null, null, 'APIKey');
+             $params[] = new SoapVar($custno, XSD_STRING, null, null, 'custno');
+             $params[] = new SoapVar($shipto, XSD_STRING, null, null, 'shipto');
+             $params[] = new SoapVar('Y', XSD_STRING, null, null, 'getPriceBreaks');
+             
 
-            // $paramsDetail = new ArrayObject();
-            // $paramsHead->append($productlist);
-
-            $productParams = new \ArrayObject();
-            $productParams[] = new \SoapVar(array('product' => $prod), SOAP_ENC_OBJECT);
-            // $productParams[] = new SoapVar($prod, XSD_STRING, null, null, 'product');
-            $thisparamLines = array('SalesCustomerPricingListLinesRequestContainer' => $productParams->getArrayCopy());
-            $params->append(
-                new SoapVar(
-                    $thisparamLines,
-                    SOAP_ENC_OBJECT,
-                    null,
-                    null,
-                    'SalesCustomerPricingListProductRequestContainer'
-                )
-            );
-
-            // $rootparams = new ArrayObject();
-            // $rootparams->append(new SoapVar($params, SOAP_ENC_OBJECT, null, null, 'SalesCustomerPricingListRequestContainer'));
 
             $rootparams = (object) [];
             $rootparams->SalesCustomerPricingListRequestContainer = $params->getArrayCopy();
@@ -946,41 +919,34 @@ class CSD extends \Magento\Framework\Model\AbstractModel
     }
 
     public function SalesCustomerQuantityPricingList($cono, $whse, $csdcustno, $product, $moduleName = "")
-    {//status=bad, save for next version_compare
-        return "";
+    {
         if ($this->botDetector()) {
             return "";
         }
-        $apiname = "SalesCustomerQuantityPricingList";
-        $this->LogAPICall($apiname, $moduleName);
+        $params = new \ArrayObject();
 
-        $apikey = $this->getConfigValue('apikey');
-        $operinit = $this->getConfigValue('operinit');
-        $client = $this->createSoapClient($apikey, $apiname);
+        $productParams = new \ArrayObject();
+        $productParams[] = new \SoapVar(array(
+            'product' => $product,
+            'whse' => $whse,
+            'qtyord' => 1,
+            'unit' => 'ea',
+        ), SOAP_ENC_OBJECT);
+      
+        $this->gwLog(__CLASS__ . "/" . __FUNCTION__ . ": " , "GetCSDPrice: Setting up SalesCustomerPricingList " );
+        $thisparamLines = array('SalesCustomerPricingListProductRequestContainer' => $productParams->getArrayCopy());
+        $params->append(
+            new SoapVar(
+                $thisparamLines,
+                SOAP_ENC_OBJECT,
+                null,
+                null,
+                'SalesCustomerPricingListProductRequestContainer'
+            )
+        );
 
-        $params1 = (object) [];
-        $params1->cono = $cono;
-        $params1->operinit = $operinit;
-
-        $params1->prod = $product->getSku();
-        $params1->whse = $whse;
-        $params1->custno = $csdcustno;
-        $params1->APIKey = $apikey;
-        $rootparams = (object) [];
-        $rootparams->SalesCustomerQuantityPricingListRequestContainer = $params1;
-        $soapResult = (object) [];
-
-        try {
-            $dTime = $this->LogAPITime($apiname, "request", $moduleName, ""); //request/result // //request/result
-            $soapResult = $client->SalesCustomerQuantityPricingList($rootparams);
-            $this->LogAPITime($apiname, "result", $moduleName, $dTime, $this->get_string_between($client->__getLastResponse(), "<requestId>", "</requestId>"));
-            $response = json_decode(json_encode($soapResult), true);
-
-            return $response;
-        } catch (\Exception $e) {
-            $this->gwLog('Caught exception: ' . json_encode($e->getMessage()));
-            $this->gwLog(__CLASS__ . "/" . __FUNCTION__ . ": ", "REQUEST:\n" . htmlentities($client->__getLastRequest()) . "");
-        }
+        return $this->SalesCustomerPricingList($cono,$csdcustno,'',$params,$moduleName);
+       
     }
 
     public function SalesShipToInsertUpdate($csdcustno, $shipto, $addressData, $email, $moduleName = "")
@@ -1432,9 +1398,8 @@ class CSD extends \Magento\Framework\Model\AbstractModel
         }
     }
 
-    public function ItemsWarehouseList($cono, $whID, $moduleName = "")
-    {  //status=bad, save for next version_compare
-        return "";
+    public function ItemsWarehouseList($cono, $moduleName = "")
+    {        
         $apiname = "ItemsWarehouseList";
         $this->LogAPICall($apiname, $moduleName);
 
@@ -1445,9 +1410,9 @@ class CSD extends \Magento\Framework\Model\AbstractModel
         try {
             $params = (object) [];
             $params->cono = $cono;
-            $params1->operinit = $operinit;
+            $params->operinit = $operinit;
 
-            $params->brswhse = $whID;
+          
             $params->APIKey = $apikey;
 
             $rootparams = (object) [];
@@ -2661,23 +2626,31 @@ class CSD extends \Magento\Framework\Model\AbstractModel
         return 0;
     }
 
-    public function SalesOrderPaymentInsert($custno, $invno, $invsuf, $amt, $operinit, $moduleName = "")
-    { //status=bad, save for next version_compare
-        return "";
+    public function SalesOrderPaymentInsert($custno, $invoiceNumber, $termsType, $amt, $shipto='',$divisionNumber='',$reference='',$gldivno='',$gldeptno='',$glacctno='',$glsubno='',$glamount='')
+    { 
         $apiname = "SalesOrderPaymentInsert";
-        $this->LogAPICall($apiname, $moduleName);
 
-        $configs = $this->getConfigValue(['apikey', 'cono']);
+        $this->LogAPICall($apiname, '');
+
+        $configs = $this->getConfigValue(['apikey', 'cono','operinit']);
         extract($configs);
         $client = $this->createSoapClient($apikey, $apiname);
 
         $params = (object) [];
         $params->cono = $cono;
+        $params->operinit = $operinit;        
         $params->custno = $custno;
-        $params->gwsinv = $invno;
-        $params->gwsinvsuf = $invsuf;
+        $params->invoiceNumber = $invoiceNumber;
+        $params->termsType = $termsType;
         $params->amount = $amt;
-        $params->operinit = $operinit;
+        $params->shipto = $shipto;
+        $params->divisionNumber = $divisionNumber;
+        $params->reference = $reference;
+        $params->gldivno = $gldivno;
+        $params->gldeptno = $gldeptno;
+        $params->glacctno = $glacctno;
+        $params->glsubno = $glsubno;
+        $params->glamount = $glamount;
         $params->APIKey = $apikey;
         $rootparams = (object) [];
         $rootparams->SalesOrderPaymentInsertRequestContainer = $params;
@@ -2760,7 +2733,7 @@ class CSD extends \Magento\Framework\Model\AbstractModel
     }
     public function UpdateOrderWithERPOrderNo($order, $ERPOrderNo, $moduleName = "")
     {
-        $configs = $this->getConfigValue(['apikey', 'cono', 'transtype']);
+        $configs = $this->getConfigValue(['apikey', 'cono', 'transtype','defaultterms','potermscode']);
         extract($configs);
 
         $orderid = $order->getIncrementId();
@@ -2905,13 +2878,12 @@ class CSD extends \Magento\Framework\Model\AbstractModel
                 $sql = "update `gws_GreyWolfOrderFieldUpdate` set `TransactionID`='" . $transID . "', `AuthID`= '" . $authNo . "', `CCAuthNo`= '" . $authNo . "', `CCNo`= '" . $lastfour . "', `CardType`= '" . $methodTitle . "', `TxnAmt`= '" . $authAmount . "' where `orderid`='" . $orderid . "'";
 
                 try {
-                    if ($dbConnection->query($sql) === true && false) { //temporarily disabling
-                        //status=bad, save for next version
-                        // echo "New record created successfully";
+                    if ($dbConnection->query($sql) === true ) {
+                       
                         $this->gwLog(__CLASS__ . "/" . __FUNCTION__ . ": ", "Order field  table updated successfully for order " . $orderid);
 
                         $orderno = $ERPOrderNo;
-                        $ordersuf = $ordersuf;
+                   
                         if ($ordersuf == "")
                             $ordersuf = "00";
                         $amount = $authAmount;
@@ -2947,9 +2919,18 @@ class CSD extends \Magento\Framework\Model\AbstractModel
                         $user8 = "";
                         $user9 = "";
                         $exp = "";
-                        //status=bad, save for next version
-                        //will be SalesOrderPaymentInsert	
-                        $this->SalesCreditCardAuthInsert($cono, $orderno, $ordersuf, $amount, $authamt, $bankno, $cardno, $charmediaauth, $cmm, $commcd, $createdt, $currproc, $mediaauth, $mediacd, $origamt, $origproccd, $preauthno, $processcd, $processno, $respdt, $response, $saleamt, $statustype, $submitdt, $transcd, $transdt, $user1, $user2, $user3, $user4, $user5, $user6, $user7, $user8, $user9, $exp);
+                 
+
+                    $termsType = $defaultterms;
+                    if ($methodcode == "purchaseorder" && isset ($potermscode)) {
+                        $termsType = $potermscode;
+                    } elseif ($methodcode == "cashondelivery") {
+                        $termsType = "cod";
+                    } elseif ((stripos($methodcode, "credit") !== false)) { 
+                        $termsType = "cc";
+                    }
+                        $this->SalesOrderPaymentInsert($custno, $SavedFieldData["ERPOrderNo"] . '-' . $SavedFieldData["ERPSuffix"], $termsType, $invAmount);
+                        
                     }
                 } catch (\Exception $e) {
                     $this->gwLog('Caught exception: ' . json_encode($e->getMessage()));
@@ -3191,16 +3172,17 @@ class CSD extends \Magento\Framework\Model\AbstractModel
     }
     public function getWhse($whse = "", $region = "")
     {
-        //	status=bad, save for next version_compare
-        return "";
-        $cono = $this->getConfigValue('cono');
+       
+        
+        $configs = $this->getConfigValue([ 'cono', 'operinit']);
+        extract($configs);
         //$this->gwLog('getting single whse from ' . $whse );
         $IswhereHouses = $this->getConfigValue('shipping_upcharge/inventory_availabilities/is_dis_inventory_availability');
         $whereHouses = $this->getConfigValue('shipping_upcharge/inventory_availabilities/inventory_availability');
         //$this->gwLog('checking whse values' );
         if ($IswhereHouses && !empty ($whereHouses)) {
 
-            $gcWhse = $this->ItemsWarehouseList($cono, "", "getWhse");
+            $gcWhse = $this->ItemsWarehouseList($cono,  "getWhse");
             if (isset ($gcWhse)) {
                 $whereHousesData = array_values(json_decode($whereHouses, true));
                 foreach ($whereHousesData as $wvalue) {

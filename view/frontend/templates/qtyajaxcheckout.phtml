@@ -42,7 +42,7 @@ $full_qty_msg = $helperData->getConfigData('defaults/products/full_qty_msg');
 
         <?php if (isset($qtyAvailable['qty']) && ($availQtyStatus == 0)): ?>
 			<div class="details-qty addeditemqty" id="<?php echo "itemid-".$_product->getId() ?>">
-                <span class="label"><strong><?= __('Qty Available'> ?>'] ?></div>
+                <span class="label"><strong><? echo __('Qty Available'); ?>'] ?></div>
             </div>
         <?php endif; ?>
         <?php if ($availQtyStatus == 1): ?>

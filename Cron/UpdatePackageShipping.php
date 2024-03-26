@@ -659,7 +659,7 @@ class UpdatePackageShipping
     {
         $this->csd->gwLog(__CLASS__ . "/" . __FUNCTION__ . ": ", "settlement processing");
         $moduleName = $this->csd->getModuleName(get_class($this));
-        $configs = $this->csd->getConfigValue(['cono', 'csdcustomerid']);
+        $configs = $this->csd->getConfigValue(['cono', 'csdcustomerid','defaultterms','potermscode']);
         $processor = $this->csd->getConfigValue('payments/payments/processor');
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
         extract($configs);
@@ -701,8 +701,7 @@ class UpdatePackageShipping
                     $this->csd->gwLog(__CLASS__ . "/" . __FUNCTION__ . ": ", "Chase:");
                 }
             } //if (isset($SavedFieldData)){
-        } //if ($processor=="Rapid Connect"){
-        elseif ($processor == "Authorize.NET") {
+        }  elseif ($processor == "Authorize.NET") {
             $this->csd->gwLog(__CLASS__ . "/" . __FUNCTION__ . ": ", "Settling with Auth.net");
             //  $transactionID = $payment->getData('last_trans_id') . '';
             $transactionID = $order->getPayment()->getData('last_trans_id');
@@ -730,9 +729,7 @@ class UpdatePackageShipping
         }
         //    $this->csd->gwLog(__CLASS__ . "/" . __FUNCTION__ . ": " , "Payment push:");
         if ($sendpaymenttoERP == true) {
-            //status=bad, save for next version
-            //TODO: implement new API
-            return "";
+
             $this->csd->gwLog(__CLASS__ . "/" . __FUNCTION__ . ": ", "Sending payment:");
             if (isset ($cust)) {
                 $custno = $cust;
@@ -754,8 +751,16 @@ class UpdatePackageShipping
 
                 }
             }
-            //status=bad, save for next version
-            $gcPay = $this->csd->SalesOrderPaymentInsert($custno, $SavedFieldData["ERPOrderNo"], $SavedFieldData["ERPSuffix"], $invAmount, $moduleName);
+            $termsType = $defaultterms;
+            if ($methodcode == "purchaseorder" && isset ($potermscode)) {
+                $termsType = $potermscode;
+            } elseif ($methodcode == "cashondelivery") {
+                $termsType = "cod";
+            } elseif ((stripos($methodcode, "credit") !== false)) { 
+                $termsType = "cc";
+            }
+            $gcPay = $this->csd->SalesOrderPaymentInsert($custno, $SavedFieldData["ERPOrderNo"] . '-' . $SavedFieldData["ERPSuffix"], $termsType, $invAmount);
+                        
             if (isset ($gcPay)) { //
                 if ($gcPay["cono"] != "0") {
                     //	$this->csd->gwLog ("pmt valid");
@@ -1229,7 +1234,7 @@ class UpdatePackageShipping
         //   } else {
         //        $response = $controller->executeWithApiResponse//(\net\authorize\api\constants\ANetEnvironment::PRODUCTION);
         //     }
-
+            $response='';
         if ($response != null) {
             // This transaction has been approved.
             if ($response->getMessages()->getResultCode() == "Ok") {

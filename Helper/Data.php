@@ -157,8 +157,8 @@ class Data extends AbstractHelper
         $moduleName = $this->csd->getModuleName(get_class($this));
         $configs = $this->csd->getConfigValue(['cono']);
         extract($configs);
-	//	status=bad, save for next version
-        return $this->csd->ItemsWarehouseList($cono, $whID, $moduleName);
+
+        return $this->csd->ItemsWarehouseList($cono,  $moduleName);
     }
 
     public function getProductImageData()
@@ -174,7 +174,7 @@ class Data extends AbstractHelper
 
     public function getQtyInfoArray($products, $region = '')
     {
-         $this->jx->gwLog("Starting  getQtyInfoArray" );
+         $this->csd->gwLog("Starting  getQtyInfoArray" );
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
         $storeManager = $objectManager->get('\Magento\Store\Model\StoreManagerInterface');
         $url= $storeManager->getStore()->getCurrentUrl(false);
@@ -612,9 +612,9 @@ error_log($result);*/
         }
 
         try {
-		//	status=bad, save for next version
+		
             $this->csd->gwLog(__CLASS__ . "/" . __FUNCTION__ . ": " , "SalesCustomerQuantityPricingList: " . $url . " - " . $product->getSku());
-            $response = $this->csd->SalesCustomerQuantityPricingList($cono, $whse, $csdcustno, $product, $moduleName);
+            $response = $this->csd->SalesCustomerQuantityPricingList ($cono, $whse, $csdcustno, $product, $moduleName);
             $formater = new \NumberFormatter('en_US', \NumberFormatter::CURRENCY);
 
             if (isset($response['price2']) && $response['price2'] > 0) {

@@ -31,7 +31,7 @@ class OrderInvoiceSaveAfter implements \Magento\Framework\Event\ObserverInterfac
     ) {
         //this claims funds that are previoulsy authorized
         global $csdcustomerid, $sendtoerpinv;
-
+        $processor="";
         if ($sendtoerpinv == "0") {
             $this->csd->gwLog(__CLASS__ . "/" . __FUNCTION__ . ": ", "settlement processing");
             $invoice = $observer->getEvent()->getInvoice();
@@ -72,9 +72,6 @@ class OrderInvoiceSaveAfter implements \Magento\Framework\Event\ObserverInterfac
             }
 
             if ($sendpaymenttoERP == true) {
-                //status=bad, save for next version
-                //TODO: implement new API
-                return "";
                 $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
                 $custno = $csdcustomerid;
 
@@ -96,14 +93,16 @@ class OrderInvoiceSaveAfter implements \Magento\Framework\Event\ObserverInterfac
                         $custno = $csdcustomerid;
                     }
                 }
-                //status=bad, save for next version
-                SalesOrderPaymentInsert($custno, $invno, $invsuf, $amt);
+               
+        
+                $gcPay = $this->csd->SalesOrderPaymentInsert($custno, $invno . '-' . $invsuf, $termsType, $invAmount);
+                  
                 //processing is not done yet.
                 $payment->setIsTransactionClosed(1);
             }
         }
 
-        return true;
+        return ;
     }
 
     public function GetSavedFieldData($orderincid)

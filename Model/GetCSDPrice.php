@@ -482,9 +482,14 @@ class GetCSDPrice implements ObserverInterface
             // $this->csd->gwLog(__CLASS__ . "/" . __FUNCTION__ . ": " , $debugstr);
 
             $productParams = new \ArrayObject();
-            $productParams[] = new \SoapVar(array('product' => $prod), SOAP_ENC_OBJECT);
-            // $productParams[] = new SoapVar($prod, XSD_STRING, null, null, 'product');
-            //$this->csd->gwLog(__CLASS__ . "/" . __FUNCTION__ . ": " , "GetCSDPrice: Setting up SalesCustomerPricingList " . $url);
+            $productParams[] = new \SoapVar(array(
+                'product' => $prod,
+                'whse' => $whse,
+                'qtyord' => 1,
+                'unit' => 'ea',
+            ), SOAP_ENC_OBJECT);
+          
+            $this->csd->gwLog(__CLASS__ . "/" . __FUNCTION__ . ": " , "GetCSDPrice: Setting up SalesCustomerPricingList " . $url);
             $thisparamLines = array('SalesCustomerPricingListProductRequestContainer' => $productParams->getArrayCopy());
             $params->append(
                 new SoapVar(
@@ -497,10 +502,10 @@ class GetCSDPrice implements ObserverInterface
             );
         }
         $qty=1;
-        $this->csd->gwLog(__CLASS__ . "/" . __FUNCTION__ . ": ", "GetCSDPrice: Calling SalesCustomerPricingSelect " . $url);
-        $dTime = $this->csd->LogAPITime("SalesCustomerPricingSelect", "request", $moduleName, ""); //request/result // //request/result
-        $gcnl = $this->csd->SalesCustomerPricingSelect($cono, $custno, $this->csd->getConfigValue('operinit'), '', $whse, $qty, $prod);
-        $this->csd->LogAPITime("SalesCustomerPricingSelect", "result", $moduleName, $dTime);
+        $this->csd->gwLog(__CLASS__ . "/" . __FUNCTION__ . ": ", "GetCSDPrice: Calling SalesCustomerPricingList " . $url);
+        $dTime = $this->csd->LogAPITime("SalesCustomerPricingList", "request", $moduleName, ""); //request/result // //request/result
+        $gcnl = $this->csd->SalesCustomerPricingList($cono, $custno, $shipto,$params );
+        $this->csd->LogAPITime("SalesCustomerPricingList", "result", $moduleName, $dTime);
     
 
 

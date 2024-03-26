@@ -15,7 +15,7 @@
         <connectivity>
             <webservices>
                 <apikey></apikey>
-                <apiurl>https://gwws.greywolf.com/csd/</apiurl>
+                <apiurl>https://connector.greywolf.com/csd/</apiurl>
                 <gwcustno></gwcustno>
             </webservices>
             <maxrecall>
