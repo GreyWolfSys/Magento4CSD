@@ -4,7 +4,7 @@
  * See COPYING.txt for license details.
  */
 -->
-<!--@subject {{trans "Order Confirmation [%ext_order_id]" ext_order_id=$order.ext_order_id}} @-->
+<!--@subject {{trans "NEE2GO.com Order Confirmation [%ext_order_id]" ext_order_id=$order.ext_order_id}} @-->
 <!--@vars {
 "var formattedBillingAddress|raw":"Billing Address",
 "var order.getEmailCustomerNote()":"Email Order Note",

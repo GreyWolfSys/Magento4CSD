@@ -11,16 +11,7 @@
             </argument>
         </arguments>
     </type>
-    <type name="Magento\Checkout\Model\CompositeConfigProvider">
-        <arguments>
-            <argument name="configProviders" xsi:type="array">
-                <item name="custom_text_config_provider" xsi:type="object">Altitude\SX\Model\ConfigProvider</item>
-            </argument>
-        </arguments>
-    </type>
-    <type name="Magento\Checkout\Block\Checkout\LayoutProcessor">
-        <plugin name="add_order_instructions1_field" type="Altitude\SX\Plugin\Checkout\LayoutProcessorPlugin" sortOrder="10"/>
-    </type>
+
 	<preference for="Magento\Checkout\Block\Onepage\Success" type="Altitude\CSD\Block\Success"/>
 
     <preference for="Magento\Sales\Controller\Adminhtml\Order\View" type="Altitude\CSD\Controller\Adminhtml\Order\View"/>

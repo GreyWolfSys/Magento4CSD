@@ -25,7 +25,7 @@
     <event name="sales_quote_load_after">
         <observer name="save_order_instructions_to_quote" instance="Altitude\SX\Observer\SaveToQuote" />
     </event>
-  
+    </event>
 
     <event name="sales_quote_address_collect_totals_before">
         <observer name="save_after_quote_Address" instance="Altitude\CSD\Observer\TotalsAfterEvent" />

@@ -182,11 +182,6 @@
                     <label>Payment Message</label>
                     <comment>This message displays in the payment section of checkout and emails.</comment>
                 </field>
-                 <field id="show_order_instructions" translate="label" type="select" sortOrder="12" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Show order instructions in checkout?</label>
-                    <comment>If set to 'Yes', an order instructions field will appear on the shipping screen. This gets sent to SX as an order note.</comment>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                </field>
             </group>
             <group id="misc" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Misc</label>

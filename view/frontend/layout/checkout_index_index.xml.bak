@@ -26,14 +26,6 @@
                                                                             <item name="dataScope" xsi:type="string">paymentmessage</item>
                                                                             <item name="provider" xsi:type="string">checkoutProvider</item>
                                                                         </item>
-
-                                                               
-                                                                        <item name="order-instruction" xsi:type="array">
-                                                                            <item name="component" xsi:type="string">Altitude_CSD/js/view/orderinstructions</item>
-                                                                            <item name="displayArea" xsi:type="string">before-place-order</item>
-                                                                            <item name="dataScope" xsi:type="string">orderinstructions</item>
-                                                                            <item name="provider" xsi:type="string">checkoutProvider</item>
-                                                                        </item>
                                                                     </item>
                                                                 </item>
                                                             </item>

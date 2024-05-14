@@ -125,9 +125,7 @@ class GetAjax extends \Magento\Framework\App\Action\Action
         } else {
             $this->csd->gwLog ("skipping config price api down");
         }
-		if ($newprice==0 && $localpriceonly=="Hybrid") {
-            $newprice = $productObj->getPrice();
-        }
+
         $result = $this->_resultJsonFactory->create();
 
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance(); 

@@ -80,38 +80,6 @@ class InstallSchema implements InstallSchemaInterface
                     ]
                 );
         }
-        if ($connection->tableColumnExists('sales_order', 'order_instructions') === false) {
-            $connection
-                ->addColumn(
-                    $setup->getTable('sales_order'),
-                    'order_instructions',
-                    [
-                        'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
-                        'length' => 0,
-                        'comment' => 'Order Instructions'
-                    ]
-                );
-        }
-        $connection
-        ->addColumn(
-            $setup->getTable('sales_order_grid'),
-            'order_instructions',
-            [
-                'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
-                'length' => 0,
-                'comment' => 'Order Instructions'
-            ]
-        );
-        $connection
-            ->addColumn(
-                $setup->getTable('quote'),
-                'order_instructions',
-                [
-                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
-                    'length' => 0,
-                    'comment' => 'Order Instructions'
-                ]
-            );
        $setup->endSetup();
 
 

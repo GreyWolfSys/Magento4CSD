@@ -44,11 +44,7 @@
                 <autoinvoice>0</autoinvoice>
                 <hidepmt></hidepmt>
                 <blockpofordefault>0</blockpofordefault>
-                <show_order_instructions>0</show_order_instructions>
             </shoppingcart>
-            <products>
-                <localpriceonly>SX</localpriceonly>
-            </products>
             <misc>
                 <updateqty>1</updateqty>
                 <alertemail></alertemail>

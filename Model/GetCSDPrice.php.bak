@@ -642,9 +642,6 @@ class GetCSDPrice implements ObserverInterface
                     if (isset ($gcnl["listprice"])) {
                         $listprice = $gcnl["listprice"];
                     }
-                    if ($price==0 && $localpriceonly=="Hybrid") {
-                        $price = $product->getPrice();
-                    } 
 
                     $product->setPrice($price);
                     $product->setFinalPrice($price);
