@@ -331,11 +331,21 @@
                         <field id="check_aval_qty">1</field>
                     </depends>
                 </field>
+                <field id="altitemidfield" translate="label" type="select" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Alternate field for Item ID?</label>
+                    <comment>If "yes", the P21 Item ID will be stored in a field named "P21 Item ID" instead of the SKU. Both fields will be required. The Item ID will be used for pricing and quantity updates.</comment>
+                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
                 <field id="local_price_only" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Dynamic Pricing Type</label>
                     <comment>Selecting "SX" will attempt to get the live and dynamic price from SX. "Magento" means using just the price stored in Magento. "Hybrid" uses the Magento price if the SX price is not available.</comment>
                     <source_model>Altitude\SX\Model\Config\Source\Localprice</source_model>
                 </field>
+                <field id="local_price_discount" type="text" sortOrder="11" showInWebsite="1" showInStore="1" showInDefault="1" translate="label">
+					<label>Apply discount to Magento Price</label>
+                    <comment>Will apply this discount as a percentage to prices taken from Magento.</comment>
+                    <validate>integer</validate>
+				</field>
             </group>
 
 

@@ -48,6 +48,7 @@
             </shoppingcart>
             <products>
                 <localpriceonly>SX</localpriceonly>
+                <local_price_discount>0</local_price_discount>
             </products>
             <misc>
                 <updateqty>1</updateqty>

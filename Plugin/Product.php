@@ -107,8 +107,14 @@ class Product
 
     public function calculate($price, $sku, $result, $debuggingflag)
     {
-        global $apikey, $apiurl, $csdcustomerid, $cono, $whse, $slsrepin, $defaultterms, $operinit, $transtype, $shipviaty, $slsrepout, $updateqty;
-
+        //global $apikey, $apiurl, $csdcustomerid, $cono, $whse, $slsrepin, $defaultterms, $operinit, $transtype, $shipviaty, $slsrepout, $updateqty;
+		$configs = $this->csd->getConfigValue(['p21customerid', 'cono', 'whse','slsrepin','defaultterms','operinit','transtype','shipviaty','slsrepout','updateqty','localpriceonly','localpricediscount' ]);
+        extract($configs);
+        if (empty($localpricediscount) || !isset($localpricediscount) || $localpricediscount==0) {
+            $localpricediscount=1;
+        } else {
+            $localpricediscount=(100-$localpricediscount)/100;
+        }
         $newprice = $result;
         //$isLoggedIn = $customerSession->getValue(\Magento\Customer\Model\Context::CONTEXT_AUTH);
 
@@ -165,16 +171,22 @@ class Product
             }
 
             return $result;
+        }elseif ($localpriceonly=="Magento"){
+            if ($debuggingflag == "true") {
+                $this->csd->gwLog("..skipping for local price only  " . $controller);
+            }
+
+            return $result;
         } elseif ($controller != 'product') {
             try {
                 if ($debuggingflag == "true") {
-                    error_log("Skipping for controller " . $controller);
+                    $this->csd->gwLog("Skipping for controller " . $controller);
                 }
 
                 return $result;
             } catch (Exception $e) {
                 if ($debuggingflag == "true") {
-                    error_log('Error ' . $e->getMessage());
+                    $this->csd->gwLog('Error ' . $e->getMessage());
                 }
                 $visibility = "4";
             }
@@ -197,7 +209,7 @@ class Product
             }
         } catch (Exception $e) {
             if ($debuggingflag == "true") {
-                error_log('Error ' . $e->getMessage());
+                $this->csd->gwLog('Error ' . $e->getMessage());
             }
         }
 
@@ -275,7 +287,10 @@ class Product
             } else {
                 $newprice = $result;
             }
-
+			if ($newprice==0 && $localpriceonly=="Hybrid") {
+                $newprice = $product->getPrice();
+                $newprice = $newprice*$localpricediscount;
+            } 
             return $newprice;
         }
     }

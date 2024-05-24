@@ -42,8 +42,14 @@ class GetAjax extends \Magento\Framework\App\Action\Action
         $moduleName = $this->csd->getModuleName(get_class($this));
         $controller = $this->getRequest()->getControllerName();
         $url = $this->csd->urlInterface()->getCurrentUrl();
-        $configs = $this->csd->getConfigValue(['cono', 'csdcustomerid', 'whse','localpriceonly']);
+        $configs = $this->csd->getConfigValue(['cono', 'csdcustomerid', 'whse','localpriceonly','localpricediscount']);
         extract($configs);
+    
+        if (empty($localpricediscount) || !isset($localpricediscount) || $localpricediscount==0) {
+            $localpricediscount=1;
+        } else {
+            $localpricediscount = (100-$localpricediscount)/100;
+        }
 
         $this->csd->gwLog(__CLASS__ . "/" . __FUNCTION__ . ": " , "$moduleName: " . $controller . " / u: " . $url);
 
@@ -74,6 +80,7 @@ class GetAjax extends \Magento\Framework\App\Action\Action
 
         if ($localpriceonly =="Magento") {
             $newprice = $product->getPrice();
+           
         }
         elseif ($apidown == false) {
             $this->csd->gwLog(__CLASS__ . "/" . __FUNCTION__ . ": " , "calling config price api. cono= " . $cono . " prod= " . $prod . " whse= " . $whse . " cust= " . $custno);
@@ -87,6 +94,9 @@ class GetAjax extends \Magento\Framework\App\Action\Action
                 if (!isset($gcnl) || isset($gcnl["fault"])) {
                     $this->csd->gwLog(__CLASS__ . "/" . __FUNCTION__ . ": " , "error from pricing");
                     $this->csd->getSession()->setApidown(true);
+					if ($localpriceonly=="Hybrid") {
+                        $newprice = $productObj->getPrice();
+                        $newprice = $newprice*$localpricediscount;
                 } elseif (isset($gcnl["price"])) {
                     $this->csd->gwLog(__CLASS__ . "/" . __FUNCTION__ . ": " , "gcnl: " . json_encode($gcnl));
                     if ($gcnl["price"]>0) {
@@ -127,6 +137,7 @@ class GetAjax extends \Magento\Framework\App\Action\Action
         }
 		if ($newprice==0 && $localpriceonly=="Hybrid") {
             $newprice = $productObj->getPrice();
+            $newprice = $newprice*$localpricediscount;
         }
         $result = $this->_resultJsonFactory->create();
 
